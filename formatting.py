@@ -56,17 +56,25 @@ class ModifiedDict(dict):
             super(ModifiedDict, self).__setitem__(key, [self[key], value])
 
 # To Update The Json Data
-def Update_Json(data_Dict):
-    formatted_data = json.loads('')
+def Update_Json(data_Dict, mInput):
+    formatted_data = json.loads(mInput)
+    toplevel_keys = list(formatted_data.keys())
+    updatekey =0
     for dataDict in data_Dict:
+        done = False
         uniQKeys = dataDict.keys()
-        for key in formatted_data.keys():
+        for key in toplevel_keys:
             if formatted_data[key].keys():
                 for key1 in formatted_data[key].keys():
                     if key1.replace(' ', '') in uniQKeys:
                         formatted_data[key][key1] = dataDict[key1.replace(
                             ' ', '')]
+                done = True
+            if done:
+                updatekey += 1
+                break
     return formatted_data
+
 
 # To Extract Duplicate keys value pairs
 def Extract_Update(mInput, output_file_name=None):
@@ -86,12 +94,13 @@ def Extract_Update(mInput, output_file_name=None):
     values = []
     dict_list = []
     for line in lines:
-        if line != '' and line != ',':
-            if line[0] == '"' and line[-2] == ':':
+        line = line.strip()
+        if line != '' and line != ',' and line != '':
+            if line[0] == '"' and line[-1] == ':' and line != '':
                 key = sub(pattern2, '', line)
                 keys.append(key)
 
-                if key in top_level_keys:
+                if key in [k.strip() for k in top_level_keys]:
                     dict_list.append(dataDict)
                     dataDict = ModifiedDict()
             else:
@@ -101,7 +110,7 @@ def Extract_Update(mInput, output_file_name=None):
                 if len(values) == 4:
                     dataDict[keys[-1]] = dict({values[0]: values[1], values[2]: float(values[3])})
                     values = []
-    return Update_Json(dict_list)
+    return Update_Json(dict_list, mInput)
 
 if __name__ == '__main__':
     print(Extract_Update(input))
