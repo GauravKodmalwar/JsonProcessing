@@ -85,7 +85,7 @@ def Extract_Update(mInput, output_file_name=None):
 
     top_level_keys = list(json.loads(mInput).keys())
 
-    lines[-2] = '"optional_key": '
+    lines[-1] = '"optional_key":'
     top_level_keys = top_level_keys[1:]
     top_level_keys.append("optional_key")
 
