@@ -78,6 +78,8 @@ def Update_Json(data_Dict, mInput):
 
 # To Extract Duplicate keys value pairs
 def Extract_Update(mInput, output_file_name=None):
+    if type(mInput) == list:
+        mInput = '\n'.join(mInput)
     lines = []
     top_level_keys = []
     lines = [sub(pattern1, '', line.replace('\n', '').replace('\t', ''))
@@ -113,4 +115,9 @@ def Extract_Update(mInput, output_file_name=None):
     return Update_Json(dict_list, mInput)
 
 if __name__ == '__main__':
+    # For Checking with .txt file
+    # input =[]
+    # with open(r"C:\PYTHON\JsonProcessing\Input2.txt", 'r', encoding='utf-8') as file:
+    #     input = file.readlines()
+    
     print(Extract_Update(input))
