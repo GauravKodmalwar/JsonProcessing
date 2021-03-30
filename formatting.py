@@ -1,46 +1,10 @@
 import json
 from re import compile, sub
 
-input = """
-{
-    "win_iis_agent": {
-        "Default Web Site": {
-            "_id": "Memory Usage",
-            "Memory Usage": 2713.0
-        },
-        "dotnettest": {
-            "_id": "Memory Usage",
-            "Memory Usage": 2713.0
-        },
-        "Default Web Site": {
-            "_id": "Free Memory percent",
-            "Free Memory percent": 41.0
-        },
-        "dotnettest": {
-            "_id": "Free Memory percent",
-            "Free Memory percent": 41.6
-        },
-        "Default Web Site": {
-            "_id": "Used Memory percent",
-            "Used Memory percent": 67.0
-        },
-        "dotnettest": {
-            "_id": "Used Memory percent",
-            "Used Memory percent": 67.0
-        },
-        "Default Web Site": {
-            "_id": "Total (Mb)",
-            "Total (Mb)": 4095.0
-        },
-        "dotnettest": {
-            "_id": "Total (Mb)",
-            "Total (Mb)": 4095.0
-        }
-    },
-    "Linux_java_agent": {}
-}
-"""
+input = """{"win_iis_agent": {"Default Web Site" :{"_id": "Memory Usage", "Memory Usage": 2713.0},"dotnettest" :{"_id": "Memory Usage", "Memory Usage": 2713.0},"Default Web Site" :{"_id": "Free Memory percent", "Free Memory percent": 41.0},"dotnettest" :{"_id": "Free Memory percent", "Free Memory percent": 41.6},"Default Web Site" :{"_id": "Used Memory percent", "Used Memory percent": 67.0},"dotnettest" :{"_id": "Used Memory percent", "Used Memory percent": 67.0},"Default Web Site" :{"_id": "Total (Mb)", "Total (Mb)": 4095.0},"dotnettest" :{"_id": "Total (Mb)", "Total (Mb)": 4095.0}},"Linux_java_agent": {"Default Web Site" :{"_id": "Memory Usage", "Memory Usage": 3333.0},"dotnettest" :{"_id": "Memory Usage", "Memory Usage": 3313.0},"Default Web Site" :{"_id": "Free Memory percent", "Free Memory percent": 31.0},"dotnettest" :{"_id": "Free Memory percent", "Free Memory percent": 31.6},"Default Web Site" :{"_id": "Used Memory percent", "Used Memory percent": 37.0},"dotnettest" :{"_id": "Used Memory percent", "Used Memory percent": 37.0},"Default Web Site" :{"_id": "Total (Mb)", "Total (Mb)": 3099.0},"dotnettest" :{"_id": "Total (Mb)", "Total (Mb)": 3099.0}},"mac_java_agent": {"Default Web Site" :{"_id": "Memory Usage", "Memory Usage": 3333.0},"dotnettest" :{"_id": "Memory Usage", "Memory Usage": 3313.0},"Default Web Site" :{"_id": "Free Memory percent", "Free Memory percent": 31.0},"dotnettest" :{"_id": "Free Memory percent", "Free Memory percent": 31.6},"Default Web Site" :{"_id": "Used Memory percent", "Used Memory percent": 37.0},"dotnettest" :{"_id": "Used Memory percent", "Used Memory percent": 37.0},"Default Web Site" :{"_id": "Total (Mb)", "Total (Mb)": 3099.0},"dotnettest" :{"_id": "Total (Mb)", "Total (Mb)": 6099.0}}}"""
 # Patterns To Deal With Keys
+# Patterns To Deal With Keys
+
 pattern1 = compile(r'[{}]')
 pattern2 = compile(r'[":,\s]')
 pattern3 = compile(r'[":,]')
@@ -56,38 +20,27 @@ class ModifiedDict(dict):
             super(ModifiedDict, self).__setitem__(key, [self[key], value])
 
 # To Update The Json Data
-def Update_Json(data_Dict, mInput):
-    formatted_data = json.loads(mInput)
+def Update_Json(data_Dict, mInput, json_loadedString):
+    formatted_data = json_loadedString
     toplevel_keys = list(formatted_data.keys())
     updatekey =0
     for dataDict in data_Dict:
-        done = False
-        uniQKeys = dataDict.keys()
-        for key in toplevel_keys:
-            if formatted_data[key].keys():
-                for key1 in formatted_data[key].keys():
-                    if key1.replace(' ', '') in uniQKeys:
-                        formatted_data[key][key1] = dataDict[key1.replace(
-                            ' ', '')]
-                done = True
-            if done:
-                updatekey += 1
-                break
+        for key in formatted_data[toplevel_keys[updatekey]].keys():
+            formatted_data[toplevel_keys[updatekey]][key] = dataDict[sub(pattern2,'',key)]
+        updatekey +=1
     return formatted_data
 
 
 # To Extract Duplicate keys value pairs
-def Extract_Update(mInput, output_file_name=None):
-    if type(mInput) == list:
-        mInput = '\n'.join(mInput)
+def Extract_Update(mInput):
     lines = []
     top_level_keys = []
-    lines = [sub(pattern1, '', line.replace('\n', '').replace('\t', ''))
-                 for line in mInput.split('\n')]
+    lines = [line for line in sub(pattern1, '\n', input).split('\n')]
 
-    top_level_keys = list(json.loads(mInput).keys())
+    json_loadedString = json.loads(mInput)
+    top_level_keys = list(json_loadedString.keys())
 
-    lines[-1] = '"optional_key":'
+    lines.append('"optional_key":')
     top_level_keys = top_level_keys[1:]
     top_level_keys.append("optional_key")
 
@@ -97,8 +50,9 @@ def Extract_Update(mInput, output_file_name=None):
     dict_list = []
     for line in lines:
         line = line.strip()
-        if line != '' and line != ',' and line != '':
-            if line[0] == '"' and line[-1] == ':' and line != '':
+
+        if line != '' and line != ',' and line != ' ':
+            if (line[0] == '"' or line[0] == ',') and line[-1] == ':' and line != '':
                 key = sub(pattern2, '', line)
                 keys.append(key)
 
@@ -107,17 +61,17 @@ def Extract_Update(mInput, output_file_name=None):
                     dataDict = ModifiedDict()
             else:
                 values.extend(line.split(':'))
-                values[-2] = sub(pattern3, '', values[-2])
-                values[-1] = sub(pattern3, '', values[-1])
-                if len(values) == 4:
-                    dataDict[keys[-1]] = dict({values[0]: values[1], values[2]: float(values[3])})
-                    values = []
-    return Update_Json(dict_list, mInput)
+                midValues = values[1].split(',')
+                key1 = sub(pattern3, '', values[0])
+                val1 = sub(pattern3, '', midValues[0])
+                key2 = sub(pattern3, '', midValues[1])
+                val2 = sub(pattern3, '', values[2])
 
-if __name__ == '__main__':
-    # For Checking with .txt file
-    # input =[]
-    # with open(r"C:\PYTHON\JsonProcessing\Input2.txt", 'r', encoding='utf-8') as file:
-    #     input = file.readlines()
-    
+                if len(values) == 3:
+                    dataDict[keys[-1]] = dict({key1: val1[1:],
+                                               key2[1:]: float(val2)})
+                    values = []
+    return Update_Json(dict_list, mInput,json_loadedString)
+
+if __name__ == '__main__': 
     print(Extract_Update(input))
