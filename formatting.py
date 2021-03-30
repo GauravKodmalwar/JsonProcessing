@@ -1,45 +1,7 @@
 import json
 from re import compile, sub
 
-input = """
-{
-    "win_iis_agent": {
-        "Default Web Site": {
-            "_id": "Memory Usage",
-            "Memory Usage": 2713.0
-        },
-        "dotnettest": {
-            "_id": "Memory Usage",
-            "Memory Usage": 2713.0
-        },
-        "Default Web Site": {
-            "_id": "Free Memory percent",
-            "Free Memory percent": 41.0
-        },
-        "dotnettest": {
-            "_id": "Free Memory percent",
-            "Free Memory percent": 41.6
-        },
-        "Default Web Site": {
-            "_id": "Used Memory percent",
-            "Used Memory percent": 67.0
-        },
-        "dotnettest": {
-            "_id": "Used Memory percent",
-            "Used Memory percent": 67.0
-        },
-        "Default Web Site": {
-            "_id": "Total (Mb)",
-            "Total (Mb)": 4095.0
-        },
-        "dotnettest": {
-            "_id": "Total (Mb)",
-            "Total (Mb)": 4095.0
-        }
-    },
-    "Linux_java_agent": {}
-}
-"""
+input = """{"win_iis_agent": {"Default Web Site" :{"_id": "Memory Usage", "Memory Usage": 2713.0},"dotnettest" :{"_id": "Memory Usage", "Memory Usage": 2713.0},"Default Web Site" :{"_id": "Free Memory percent", "Free Memory percent": 41.0},"dotnettest" :{"_id": "Free Memory percent", "Free Memory percent": 41.6},"Default Web Site" :{"_id": "Used Memory percent", "Used Memory percent": 67.0},"dotnettest" :{"_id": "Used Memory percent", "Used Memory percent": 67.0},"Default Web Site" :{"_id": "Total (Mb)", "Total (Mb)": 4095.0},"dotnettest" :{"_id": "Total (Mb)", "Total (Mb)": 4095.0}},"Linux_java_agent": {}}"""
 # Patterns To Deal With Keys
 pattern1 = compile(r'[{}]')
 pattern2 = compile(r'[":,\s]')
