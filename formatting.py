@@ -98,6 +98,6 @@ def Extract_Update(mInput):
 
 if __name__ == '__main__':
     data = Extract_Update(input)
-    # with open(r"Output.json", 'w') as f:
-    #     json.dump(data, f, indent=4)
+    with open(r"C:\PYTHON\JsonProcessing\OutPut.json", 'w') as f:
+        json.dump(data, f, indent=4)
     print(data)
